@@ -1,0 +1,30 @@
+{
+  "pageHeight" : 30,
+  "pageWidth" : 40,
+  "port" : "Gprinter  GP-1324D",
+  "set" : 1
+  "copy" : 1,
+  "data" : [{
+    "data" : "DIRECTION 1",
+    "type" : "command"
+  }, {
+    "data" : "GAP 10mm, 10mm",
+    "type" : "command"
+  }, {
+    "content" : "中文测试",
+    "fontHeight" : 80,
+    "fontName" : "Arial",
+    "fontStyle" : 0,
+    "fontUnderline" : 0,
+    "rotation" : 0,
+    "type" : "text",
+    "x" : 10,
+    "y" : 10
+  }, {
+    "imageFile" : "E:\\cachedFiles\\logo.png",
+    "mode" : 1,
+    "type" : "image",
+    "x" : 100,
+    "y" : 100
+  }]
+}
