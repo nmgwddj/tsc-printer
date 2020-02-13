@@ -105,8 +105,9 @@ def main():
                         command["mode"],
                         load_dict["pageWidth"],
                         load_dict["pageHeight"])
-    close_port()
 
+    print_label(str(load_dict["set"]), str(load_dict["copy"]))
+    close_port()
 
 if __name__ == "__main__":
     main()
