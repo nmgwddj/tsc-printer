@@ -7,12 +7,13 @@ import numpy as np
 
 DPI = 200  # DPI of printer
 DOT = DPI // 100 * 4  # Dots per mm
+CONTRAST = 128  # A number between 0~255
 
 tsclibrary = ctypes.WinDLL("TSCLIB.dll");
 
 
 def open_port(port):
-    tsclibrary.openport(port)
+    tsclibrary.openportW(port)
 
 
 def close_port():
@@ -24,15 +25,15 @@ def clear_buffer():
 
 
 def print_label(set, copy):
-    tsclibrary.printlabel(set, copy)
+    tsclibrary.printlabelW(set, copy)
 
 
 def send_command(command_line):
-    tsclibrary.sendcommand(command_line)
+    tsclibrary.sendcommandW(command_line)
 
 
 def windows_font(x, y, font_height, rotation, font_style, font_underline, font_name, content):
-    tsclibrary.windowsfont(x, y, font_height, rotation, font_style, font_underline, font_name, content)
+    tsclibrary.windowsfontW(x, y, font_height, rotation, font_style, font_underline, font_name, content)
 
 
 def windows_font_unicode(x, y, font_height, rotation, font_style, font_underline, font_name, content):
@@ -61,9 +62,7 @@ def print_image(image_file, x, y, mode, page_width = 40, page_height = 30):
     bitmap = [0 for i in range(width * height // 8)]  # sending 0 may cause some err
     offset = [255 for i in range(width * height // 8)]  # so use offset to make it work
     for i in range(width * height // 8):
-        bitmap[i] = eval(
-            "0b" + str(im1[i * 8:(i + 1) * 8]).replace(" ", "").replace(",", '').replace("[", '').replace("]",
-                                                                                                          ''))
+        bitmap[i] = eval("0b" + str(im1[i * 8:(i + 1) * 8]).replace(" ", "").replace(",", '').replace("[", '').replace("]", ''))
         if bitmap[i] == 0:
             bitmap[i] = 1
             offset[i] = 254
@@ -78,24 +77,39 @@ def print_image(image_file, x, y, mode, page_width = 40, page_height = 30):
     return
 
 
+def seeBitmap(bitmap):
+    ss = ""
+    for i in bitmap:
+        if i == 1:
+            ss += "00 "
+        else:
+            tt = str(hex(i))[2:].upper()
+            if len(tt) == 1:
+                tt = "0" + tt
+            ss += tt + " "
+    print(ss)
+
+
 def main():
     with open("command_line.json", 'r', encoding="utf-8") as load_f:
         load_dict = json.load(load_f)
-    print(load_dict)
 
-    open_port(load_dict["port"])
+    print(load_dict)
+    open_port(str(load_dict["port"]))
+    send_command("DENSITY " + str(DENSITY));
     send_command('SIZE ' + str(load_dict["pageWidth"]) + ' mm, ' + str(load_dict["pageHeight"]) + ' mm')
+    clear_buffer()
 
     for command in load_dict["data"]:
         if command["type"] == 'text':
-            windows_font(command["x"],
-                         command["y"],
-                         command["fontHeight"],
-                         command["rotation"],
-                         command["fontStyle"],
-                         command["fontUnderline"],
-                         command["fontName"],
-                         command["content"])
+            windows_font_unicode(command["x"],
+                             command["y"],
+                             command["fontHeight"],
+                             command["rotation"],
+                             command["fontStyle"],
+                             command["fontUnderline"],
+                             command["fontName"],
+                             command["content"])
         elif command["type"] == 'command':
             send_command(command["data"])
         elif command["type"] == 'image':
@@ -108,6 +122,7 @@ def main():
 
     print_label(str(load_dict["set"]), str(load_dict["copy"]))
     close_port()
+
 
 if __name__ == "__main__":
     main()
